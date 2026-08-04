@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prakash Electrical & Refrigeration</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fa;color:#132238}
+header{background:#0b4f8a;color:white;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:15px;position:sticky;top:0;z-index:5}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.gear{font-size:30px}.logo small{display:block;font-size:11px;font-weight:500}
+button{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:700}.cartBtn{background:white;color:#0b4f8a}
+.hero{padding:45px 5%;background:linear-gradient(120deg,#e7f4ff,#fff);text-align:center}.hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:8px 0 20px;color:#4d6075}
+.wrap{max-width:1100px;margin:auto;padding:25px 5%}.tools{display:flex;gap:10px;margin-bottom:20px}.tools input{flex:1;padding:13px;border:1px solid #ccd5df;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.card{background:white;border:1px solid #e1e6ec;border-radius:12px;padding:18px;box-shadow:0 2px 8px #0000000b}.pic{height:125px;border-radius:10px;background:#eef5fb;display:flex;align-items:center;justify-content:center;font-size:48px}.card h3{font-size:16px;min-height:40px}.price{font-size:20px;font-weight:800;margin:8px 0 14px}.add{width:100%;background:#0b4f8a;color:white}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:25px}.info div{background:white;padding:18px;border-radius:10px;text-align:center}
+footer{text-align:center;padding:25px;background:#10283f;color:white;margin-top:30px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:10;align-items:center;justify-content:center;padding:15px}.box{background:white;max-width:500px;width:100%;border-radius:14px;padding:22px;max-height:90vh;overflow:auto}.row{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:9px 0}.box input,.box textarea{width:100%;padding:11px;margin:6px 0 10px;border:1px solid #ccd5df;border-radius:7px}.send{background:#16a34a;color:white;width:100%;margin-top:8px}.close{background:#e9eef3}
+@media(max-width:650px){header{align-items:flex-start}.info{grid-template-columns:1fr}.hero h1{font-size:25px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="gear">⚙️❄️</span><div>PRAKASH<small>Electrical & Refrigeration</small></div></div>
+  <button class="cartBtn" onclick="openCart()">🛒 Cart (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+<h1>Local Spare Parts Online Store</h1>
+<p>Washing Machine • Refrigerator • AC • RO & Electrical Spare Parts</p>
+<button onclick="document.getElementById('products').scrollIntoView()">Browse Products</button>
+</section>
+
+<main class="wrap" id="products">
+<div class="tools"><input id="search" placeholder="Search spare part..." oninput="render()"></div>
+<div class="grid" id="grid"></div>
+<div class="info">
+<div>🚚<br><b>Local Delivery</b><br>Nearby customers</div>
+<div>💵<br><b>COD / UPI</b><br>Payment options</div>
+<div>📲<br><b>WhatsApp</b><br>8923987100</div>
+</div>
+</main>
+
+<footer>Prakash Electrical & Refrigeration • Local Spare Parts Supply • WhatsApp: 8923987100</footer>
+
+<div class="modal" id="modal"><div class="box">
+<h2>Your Order</h2><div id="cart"></div><p><b>Total: ₹<span id="total">0</span></b></p>
+<input id="name" placeholder="Customer name">
+<input id="phone" placeholder="Mobile number">
+<textarea id="address" rows="3" placeholder="Delivery address"></textarea>
+<button class="send" onclick="sendOrder()">Send Order on WhatsApp</button>
+<button class="close" onclick="closeCart()">Close</button>
+</div></div>
+
+<script>
+const products=[
+["LG New Model Gear Box",400,"⚙️"],["LG Old Model Gear Box",400,"⚙️"],
+["Videocon Virat Gear Box",350,"⚙️"],["Drain Valve LG",40,"🔧"],
+["Drain Valve Samsung",40,"🔧"],["Drain Valve Whirlpool",40,"🔧"],
+["Whirlpool Gear Box",450,"⚙️"]
+];
+let cart=[];
+function render(){
+ const q=document.getElementById('search').value.toLowerCase();
+ document.getElementById('grid').innerHTML=products.filter(p=>p[0].toLowerCase().includes(q)).map((p,i)=>
+ `<div class="card"><div class="pic">${p[2]}</div><h3>${p[0]}</h3><div class="price">₹${p[1]}</div><button class="add" onclick="add(${i})">Add to Cart</button></div>`).join('');
+}
+function add(i){cart.push(i);update();alert("Added to cart");}
+function update(){document.getElementById('count').textContent=cart.length}
+function openCart(){
+ document.getElementById('modal').style.display='flex';
+ const counts={};cart.forEach(i=>counts[i]=(counts[i]||0)+1);
+ let total=0;let out='';
+ Object.keys(counts).forEach(i=>{let p=products[i],n=counts[i],s=p[1]*n;total+=s;out+=`<div class="row"><span>${p[0]} × ${n}</span><b>₹${s}</b></div>`});
+ document.getElementById('cart').innerHTML=out||'<p>Your cart is empty.</p>';
+ document.getElementById('total').textContent=total;
+}
+function closeCart(){document.getElementById('modal').style.display='none'}
+function sendOrder(){
+ if(!cart.length){alert("Cart is empty");return}
+ let name=document.getElementById('name').value.trim(),phone=document.getElementById('phone').value.trim(),address=document.getElementById('address').value.trim();
+ if(!name||!phone||!address){alert("Please enter name, mobile and address");return}
+ const counts={};cart.forEach(i=>counts[i]=(counts[i]||0)+1);let total=0,msg=`New Order - Prakash Electrical & Refrigeration%0A%0A`;
+ Object.keys(counts).forEach(i=>{let p=products[i],n=counts[i];total+=p[1]*n;msg+=`${p[0]} x ${n} = ₹${p[1]*n}%0A`});
+ msg+=`%0ATotal: ₹${total}%0A%0ACustomer: ${name}%0AMobile: ${phone}%0AAddress: ${address}`;
+ window.open('https://wa.me/918923987100?text='+msg,'_blank');
+}
+render();
+</script>
+</body>
+</html>
