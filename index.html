@@ -46,11 +46,25 @@ document.getElementById("items").innerHTML=cart.length?cart.map((p,i)=>`${i+1}. 
 document.getElementById("total").textContent=cart.reduce((s,p)=>s+p[1],0);
 }
 function whatsapp(){
-if(!cart.length){alert("Cart is empty");return}
-let m="Hello Prakash Electrical & Refrigeration,%0A%0AI want to order:%0A";
-cart.forEach((p,i)=>m+=`${i+1}. ${p[0]} - ₹${p[1]}%0A`);
-m+="%0ATotal: ₹"+cart.reduce((s,p)=>s+p[1],0);
-window.open("https://wa.me/918923987100?text="+m,"_blank");
+
+if(!cart.length){
+alert("Cart is empty");
+return;
+}
+
+let m = "Hello Prakash Electrical & Refrigeration,\n\n";
+m += "I want to order:\n\n";
+
+cart.forEach((p,i)=>{
+m += `${i+1}. ${p[0]} - ₹${p[1]}\n`;
+});
+
+m += `\nTotal: ₹${cart.reduce((s,p)=>s+p[1],0)}`;
+
+let url = "https://wa.me/918923987100?text=" + encodeURIComponent(m);
+
+window.open(url,"_blank");
+
 }
 render();
 </script>
