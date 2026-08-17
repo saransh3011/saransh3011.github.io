@@ -5,7 +5,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Prakash Electrical & Refrigeration</title>
+.cart-row{
+  padding:12px 0;
+  border-bottom:1px solid #ddd;
+}
 
+.qty-box{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+}
+
+.qty-box button{
+  width:34px;
+  height:34px;
+  padding:0;
+  font-size:18px;
+  background:#eee;
+}
+
+.qty{
+  min-width:25px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.remove-btn{
+  background:#ff4d4d !important;
+  color:white;
+  padding:7px 10px !important;
+  margin-left:auto;
+}
+
+.customer-input{
+  width:100%;
+  box-sizing:border-box;
+  padding:12px;
+  margin:7px 0;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:15px;
+}
 <style>
 
 body{
@@ -221,10 +262,59 @@ Loading products...
 <div id="items"></div>
 
 <div class="total">
-
 Total: ₹<span id="total">0</span>
-
 </div>
+
+<hr>
+
+<h3>📦 Customer Details</h3>
+
+<input
+  class="customer-input"
+  id="customerName"
+  type="text"
+  placeholder="Customer Name"
+>
+
+<input
+  class="customer-input"
+  id="customerPhone"
+  type="tel"
+  placeholder="Mobile Number"
+  maxlength="10"
+>
+
+<textarea
+  class="customer-input"
+  id="customerAddress"
+  rows="3"
+  placeholder="Delivery Address"
+></textarea>
+
+<hr>
+
+<p><b>Payment के बाद ही Order करें</b></p>
+
+<p style="font-size:14px;color:#555">
+Payment करने के बाद payment screenshot WhatsApp पर भेजना जरूरी है।
+</p>
+
+<label style="display:block;margin:15px 0">
+<input type="checkbox" id="paid">
+मैंने payment कर दी है।
+</label>
+
+<button
+  class="whatsapp"
+  onclick="whatsapp()">
+📱 WhatsApp पर Order करें
+</button>
+
+<button
+  class="close"
+  onclick="closeCart()">
+Close
+</button>
 
 
 <p>
@@ -521,28 +611,27 @@ Add to Cart
 
 window.addToCart = function(id){
 
-const product =
-products.find((p)=>p.id === id);
+  const product = products.find((p)=>p.id === id);
 
+  if(!product){
+    return;
+  }
 
-if(!product){
+  const existing = cart.find((p)=>p.id === id);
 
-return;
+  if(existing){
+    existing.qty++;
+  }else{
+    cart.push({
+      ...product,
+      qty:1
+    });
+  }
 
-}
+  updateCartCount();
 
-
-cart.push(product);
-
-
-document.getElementById("count")
-.textContent = cart.length;
-
-
-alert("Product added to cart");
-
+  alert("Product added to cart");
 };
-
 
 
 /* =========================
@@ -551,57 +640,10 @@ alert("Product added to cart");
 
 window.showCart = function(){
 
-document.getElementById("box")
-.style.display = "block";
+  document.getElementById("box").style.display = "block";
 
-
-if(cart.length === 0){
-
-document.getElementById("items").innerHTML = `
-
-<div style="padding:20px;text-align:center">
-
-🛒 Cart is empty
-
-</div>
-
-`;
-
-}else{
-
-
-document.getElementById("items").innerHTML =
-
-cart.map((p,i)=>`
-
-<div class="cart-item">
-
-<b>${i+1}. ${p.name}</b>
-
-<br>
-
-₹${p.price}
-
-</div>
-
-`).join("");
-
-}
-
-
-document.getElementById("total")
-.textContent =
-
-cart.reduce(
-
-(sum,p)=>sum+p.price,
-
-0
-
-);
-
+  renderCart();
 };
-
 
 
 /* =========================
@@ -614,87 +656,190 @@ document.getElementById("box")
 .style.display = "none";
 
 };
+function renderCart(){
 
+  const items = document.getElementById("items");
 
+  if(cart.length === 0){
 
+    items.innerHTML = `
+      <div style="padding:20px;text-align:center">
+        🛒 Cart is empty
+      </div>
+    `;
+
+    document.getElementById("total").textContent = "0";
+
+    return;
+  }
+
+  items.innerHTML = cart.map((p,i)=>`
+
+    <div class="cart-row">
+
+      <b>${p.name}</b>
+
+      <div>
+        ₹${p.price} × ${p.qty}
+      </div>
+
+      <div class="qty-box">
+
+        <button onclick="changeQty(${i},-1)">
+          −
+        </button>
+
+        <span class="qty">
+          ${p.qty}
+        </span>
+
+        <button onclick="changeQty(${i},1)">
+          +
+        </button>
+
+        <button
+          class="remove-btn"
+          onclick="removeItem(${i})">
+          🗑️
+        </button>
+
+      </div>
+
+      <b>
+        Subtotal: ₹${p.price * p.qty}
+      </b>
+
+    </div>
+
+  `).join("");
+
+  const total = cart.reduce(
+    (sum,p)=>sum + (p.price * p.qty),
+    0
+  );
+
+  document.getElementById("total").textContent = total;
+}
+window.changeQty = function(index,change){
+
+  cart[index].qty += change;
+
+  if(cart[index].qty <= 0){
+    cart.splice(index,1);
+  }
+
+  updateCartCount();
+  renderCart();
+};
+window.removeItem = function(index){
+
+  cart.splice(index,1);
+
+  updateCartCount();
+  renderCart();
+};
+   function updateCartCount(){
+
+  const count = cart.reduce(
+    (sum,p)=>sum + p.qty,
+    0
+  );
+
+  document.getElementById("count").textContent = count;
+}
+   
 /* =========================
    WHATSAPP ORDER
 ========================= */
 
 window.whatsapp = function(){
 
+  if(cart.length === 0){
 
-if(cart.length === 0){
+    alert("Cart is empty");
 
-alert("Cart is empty");
+    return;
+  }
 
-return;
+  const name =
+    document.getElementById("customerName").value.trim();
 
-}
+  const phone =
+    document.getElementById("customerPhone").value.trim();
 
+  const address =
+    document.getElementById("customerAddress").value.trim();
 
-if(!document.getElementById("paid").checked){
+  if(!name){
 
-alert(
-"Please make payment first and tick the payment checkbox."
-);
+    alert("Please enter customer name");
 
-return;
+    return;
+  }
 
-}
+  if(!/^[0-9]{10}$/.test(phone)){
 
+    alert("Please enter a valid 10 digit mobile number");
 
-let total =
+    return;
+  }
 
-cart.reduce(
+  if(!address){
 
-(sum,p)=>sum+p.price,
+    alert("Please enter delivery address");
 
-0
+    return;
+  }
 
-);
+  if(!document.getElementById("paid").checked){
 
+    alert(
+      "Please make payment first and tick the payment checkbox."
+    );
 
-let message =
+    return;
+  }
 
-"Hello Prakash Electrical & Refrigeration,\n\n";
+  const total = cart.reduce(
+    (sum,p)=>sum + (p.price * p.qty),
+    0
+  );
 
+  let message =
+    "Hello Prakash Electrical & Refrigeration,\n\n";
 
-message +=
+  message += "🛒 NEW ORDER\n\n";
 
-"I want to order:\n\n";
+  message += "Customer Name: " + name + "\n";
 
+  message += "Mobile: " + phone + "\n";
 
-cart.forEach((p,i)=>{
+  message += "Address: " + address + "\n\n";
 
-message +=
+  message += "ORDER ITEMS:\n\n";
 
-`${i+1}. ${p.name} - ₹${p.price}\n`;
+  cart.forEach((p,i)=>{
 
-});
+    message +=
+      `${i+1}. ${p.name}\n` +
+      `Qty: ${p.qty}\n` +
+      `Price: ₹${p.price}\n` +
+      `Subtotal: ₹${p.price * p.qty}\n\n`;
 
+  });
 
-message +=
+  message +=
+    "TOTAL: ₹" + total + "\n\n";
 
-`\nTotal: ₹${total}`;
+  message +=
+    "Payment Done. Please confirm my order.";
 
+  const url =
+    "https://wa.me/918923987100?text=" +
+    encodeURIComponent(message);
 
-message +=
-
-"\n\nPayment Done. Please confirm my order.";
-
-
-const url =
-
-"https://wa.me/918923987100?text=" +
-
-encodeURIComponent(message);
-
-
-window.open(url,"_blank");
-
+  window.open(url,"_blank");
 };
-
 
 
 /* =========================
